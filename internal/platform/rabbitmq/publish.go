@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"time"
 
 	"github.com/streadway/amqp"
 
@@ -21,10 +22,12 @@ type publisherContext struct {
 }
 
 func NewPublisher(ctx context.Context, c *Client, cfg config.Publisher) (Publisher, error) {
+	if c == nil {
+		return nil, ErrClientNotProvided
+	}
 	p := publisherContext{
 		cfg: cfg,
 	}
-
 	ch, err := c.connection.Channel()
 	if err != nil {
 		return nil, err
@@ -47,7 +50,6 @@ func NewPublisher(ctx context.Context, c *Client, cfg config.Publisher) (Publish
 	if err := p.channel.QueueBind(cfg.Queue, cfg.RoutingKey, cfg.Exchange, false, nil); err != nil {
 		return nil, err
 	}
-
 	return &p, nil
 }
 
@@ -69,6 +71,7 @@ func (c *publisherContext) Publish(ctx context.Context, data interface{}, msgTyp
 		Type:          msgType,
 		AppId:         hostname,
 		Body:          payload,
+		Timestamp:     time.Now().UTC(),
 	}
 	if err := c.channel.Publish(c.cfg.Exchange, c.cfg.RoutingKey, false, false, msg); err != nil {
 		return err

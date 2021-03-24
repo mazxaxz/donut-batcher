@@ -2,18 +2,22 @@ package rabbitmq
 
 import (
 	"context"
+	"fmt"
+	"os"
 
+	"github.com/google/uuid"
 	"github.com/streadway/amqp"
 
 	"github.com/mazxaxz/donut-batcher/internal/platform/rabbitmq/config"
+	"github.com/mazxaxz/donut-batcher/pkg/requestid"
 )
 
-type Callback func(ctx context.Context, delivery amqp.Delivery) error
+type Callback func(ctx context.Context, delivery amqp.Delivery) (bool, error)
 
 func (c *Client) Subscribe(ctx context.Context, cfg config.Subscriber, cb Callback) {
 	ch, err := c.connection.Channel()
 	if err != nil {
-		// TODO log
+		c.logger.Error(err)
 		return
 	}
 	defer func() { _ = ch.Close() }()
@@ -21,13 +25,15 @@ func (c *Client) Subscribe(ctx context.Context, cfg config.Subscriber, cb Callba
 	durable := !cfg.Exclusive
 	autoDelete := cfg.Exclusive
 	if _, err := ch.QueueDeclare(cfg.Queue, durable, autoDelete, cfg.Exclusive, false, nil); err != nil {
-		// TODO log
+		c.logger.Error(err)
 		return
 	}
 
-	msgs, err := ch.Consume(cfg.Queue, "TODO", false, cfg.Exclusive, false, false, nil)
+	hostname, _ := os.Hostname()
+	uid := uuid.NewString()
+	msgs, err := ch.Consume(cfg.Queue, fmt.Sprintf("%s_%s", hostname, uid), false, cfg.Exclusive, false, false, nil)
 	if err != nil {
-		// TODO log
+		c.logger.Error(err)
 		return
 	}
 
@@ -39,9 +45,23 @@ func (c *Client) Subscribe(ctx context.Context, cfg config.Subscriber, cb Callba
 
 	go func() {
 		for d := range msgs {
-			// TODO request id
-			if err := cb(ctx, d); err != nil {
-				// TODO log
+			if d.CorrelationId == "" {
+				d.CorrelationId = requestid.NewRequestID()
+			}
+			ctx = requestid.New(ctx, d.CorrelationId)
+
+			ack, err := cb(ctx, d)
+			if err != nil {
+				c.logger.Error(err)
+			}
+			if ack {
+				if err := d.Ack(false); err != nil {
+					c.logger.Error(err)
+				}
+			} else {
+				if err := d.Nack(false, true); err != nil {
+					c.logger.Error(err)
+				}
 			}
 		}
 	}()

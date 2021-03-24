@@ -20,15 +20,23 @@ const (
 	unableToCorrelate = "UNABLE_TO_CORRELATE"
 )
 
-func Context(parent context.Context) context.Context {
-	var rid string
-	uid, err := uuid.NewUUID()
-	if err != nil {
-		rid = unableToCorrelate
-	} else {
-		rid = "|:" + uid.String()
+func New(parent context.Context, rid string) context.Context {
+	if rid == "" {
+		return Context(parent)
 	}
 	return context.WithValue(parent, contextKeyRequestID, rid)
+}
+
+func Context(parent context.Context) context.Context {
+	return context.WithValue(parent, contextKeyRequestID, NewRequestID())
+}
+
+func NewRequestID() string {
+	uid, err := uuid.NewUUID()
+	if err != nil {
+		return unableToCorrelate
+	}
+	return "|:" + uid.String()
 }
 
 func From(ctx context.Context) (rid string, exists bool) {
