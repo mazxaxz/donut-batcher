@@ -5,13 +5,13 @@ import (
 	"fmt"
 )
 
-type Client interface {
+type Clienter interface {
 	Send(_ context.Context, userID, amount, currency string) error
 }
 
 type clientContext struct{}
 
-func New() Client {
+func New() Clienter {
 	c := clientContext{}
 	return &c
 }

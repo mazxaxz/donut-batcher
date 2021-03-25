@@ -28,13 +28,13 @@ type Service interface {
 }
 
 type serviceContext struct {
-	mongo     *mongodb.Client
-	bankSDK   banksdk.Client
+	mongo     mongodb.Clienter
+	bankSDK   banksdk.Clienter
 	logger    *logrus.Logger
 	threshold map[money.Currency]string
 }
 
-func New(mc *mongodb.Client, bc banksdk.Client, l *logrus.Logger, threshold map[string]string) (Service, error) {
+func New(mc mongodb.Clienter, bc banksdk.Clienter, l *logrus.Logger, threshold map[string]string) (Service, error) {
 	c := serviceContext{
 		mongo:     mc,
 		bankSDK:   bc,

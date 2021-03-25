@@ -8,7 +8,7 @@ import (
 
 type TransactionCallback func(sessCtx mongo.SessionContext) (interface{}, error)
 
-func (c *Client) WithinTransaction(ctx context.Context, cb TransactionCallback) (result interface{}, err error) {
+func (c *clientContext) WithinTransaction(ctx context.Context, cb TransactionCallback) (result interface{}, err error) {
 	session, err := c.client.StartSession()
 	if err != nil {
 		return nil, err

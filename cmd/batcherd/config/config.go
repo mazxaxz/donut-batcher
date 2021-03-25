@@ -10,7 +10,7 @@ import (
 )
 
 type Config struct {
-	HTTP                    rest.Config             `env:"HTTP"`
+	HTTP                    rest.Config             `env:"HTTP,required=true"`
 	ThresholdUSD            string                  `env:"THRESHOLD_USD,default=100"`
 	MongoClient             mongoConfig.Config      `env:"MONGO_CLIENT,required=true"`
 	MQClient                rabbitConfig.Config     `env:"MQ_CLIENT,required=true"`
