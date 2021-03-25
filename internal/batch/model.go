@@ -40,3 +40,16 @@ func NewBatch(userID string, currency money.Currency) Batch {
 	}
 	return b
 }
+
+func NewStatusFrom(input string) Status {
+	switch input {
+	case StatusUndispatched:
+		return StatusUndispatched
+	case StatusReadyToDispatch:
+		return StatusReadyToDispatch
+	case StatusDispatched:
+		return StatusDispatched
+	default:
+		return StatusUndispatched
+	}
+}

@@ -1,0 +1,7 @@
+.idea/
+.run/
+docker-compose.yml
+README.md
+rest.http
+.gitignore
+.DS_STORE

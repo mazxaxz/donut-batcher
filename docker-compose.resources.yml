@@ -1,11 +1,18 @@
 version: '3.8'
 
+networks:
+  donut-vn:
+    name: donut-vn
+    driver: bridge
+
 services:
   mongo:
     image: mongo:4.4.4
     restart: always
     ports:
       - 37017:27017
+    networks:
+      - donut-vn
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -14,6 +21,8 @@ services:
   rabbit:
     image: bitnami/rabbitmq:3.8.14
     restart: on-failure
+    networks:
+      - donut-vn
     ports:
       - 35672:15672
       - 35673:5672

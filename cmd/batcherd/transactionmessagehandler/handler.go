@@ -13,6 +13,7 @@ import (
 	"github.com/mazxaxz/donut-batcher/internal/platform/rabbitmq"
 	"github.com/mazxaxz/donut-batcher/pkg/message/dispatch"
 	"github.com/mazxaxz/donut-batcher/pkg/message/transaction"
+	"github.com/mazxaxz/donut-batcher/pkg/money"
 )
 
 type handlerContext struct {
@@ -41,14 +42,17 @@ func (c *handlerContext) Handle(ctx context.Context, delivery amqp.Delivery) (bo
 		result, err := c.batchSvc.Batch(ctx, msg)
 		if err != nil {
 			switch err {
-			// TODO:
+			case money.ErrNegativeAmount, money.ErrZeroAmount, money.ErrInvalidCurrencyCode:
+				return true, err
+			default:
+				return false, err
 			}
 		}
 		if result.Status == batch.StatusReadyToDispatch {
-			payload := dispatch.Dispatch{BatchID: result.ID.String()}
+			payload := dispatch.Dispatch{BatchID: result.ID.Hex()}
 			err := c.dispatchPublisher.Publish(ctx, payload, dispatch.MessageTypeDispatch)
 			if err != nil {
-				return true, errors.Wrap(err, fmt.Sprintf("could not send dispatch event, BatchID: %s", result.ID.String()))
+				return true, errors.Wrap(err, fmt.Sprintf("could not send dispatch event, BatchID: %s", result.ID.Hex()))
 			}
 		}
 		return true, nil

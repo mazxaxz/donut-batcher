@@ -18,3 +18,7 @@ func CurrencyFrom(input string) (Currency, error) {
 	}
 	return Currency(strings.ToUpper(input)), nil
 }
+
+func (c Currency) String() string {
+	return string(c)
+}

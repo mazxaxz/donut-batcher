@@ -46,8 +46,9 @@ func (c *Client) Subscribe(ctx context.Context, cfg config.Subscriber, cb Callba
 		return
 	}
 
-	uid := uuid.NewString()
-	msgs, err := ch.Consume(cfg.Queue, fmt.Sprintf("%s_%s", hostname, uid), false, cfg.Exclusive, false, false, nil)
+	consumerID := uuid.NewString()
+	ch.Qos(cfg.PrefetchCount, 0, false)
+	msgs, err := ch.Consume(cfg.Queue, fmt.Sprintf("%s_%s", hostname, consumerID), false, cfg.Exclusive, false, false, nil)
 	if err != nil {
 		entry := logger.Log{
 			Hostname:  hostname,

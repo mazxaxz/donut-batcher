@@ -2,6 +2,7 @@ package shutdown
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,11 +11,17 @@ import (
 )
 
 // Wait for termination signal then cancel the context
-func Wait(cancel context.CancelFunc, l *logrus.Logger) {
+func Wait(cancel context.CancelFunc, l *logrus.Logger, srvs ...http.Server) {
 	termChan := make(chan os.Signal, 1)
 	signal.Notify(termChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGABRT)
 	<-termChan
 
-	logrus.Info("Closing app...")
+	for i := range srvs {
+		if err := srvs[i].Close(); err != nil {
+			l.Warn(err)
+		}
+	}
+
+	l.Info("Closing app...")
 	cancel()
 }

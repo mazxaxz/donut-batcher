@@ -8,7 +8,7 @@ import (
 )
 
 type Indexer interface {
-	Index(ctx context.Context) error
+	Index(ctx context.Context)
 }
 
 func (c *Client) CreateIndex(ctx context.Context, collectionName string, spec mongo.IndexModel) error {

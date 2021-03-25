@@ -4,7 +4,12 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+func (c *Client) Find(ctx context.Context, coll string, filter interface{}, opt *options.FindOptions) (*mongo.Cursor, error) {
+	return c.client.Database(c.db).Collection(coll).Find(ctx, filter, opt)
+}
 
 func (c *Client) FindOne(ctx context.Context, coll string, filter interface{}) *mongo.SingleResult {
 	return c.client.Database(c.db).Collection(coll).FindOne(ctx, filter)
