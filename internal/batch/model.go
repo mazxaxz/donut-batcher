@@ -11,9 +11,9 @@ import (
 type Status string
 
 const (
-	StatusUndispatched = "undispatched"
-	StatusDispatching  = "dispatching"
-	StatusDispatched   = "dispatched"
+	StatusUndispatched    = "undispatched"
+	StatusReadyToDispatch = "ready-to-dispatch"
+	StatusDispatched      = "dispatched"
 )
 
 type Batch struct {
@@ -25,5 +25,18 @@ type Batch struct {
 	Status         Status               `bson:"status" json:"status"`
 	CreatedDate    time.Time            `bson:"createdDate" json:"createdDate"`
 	UpdatedDate    time.Time            `bson:"updatedDate" json:"updatedDate"`
-	DispatchedDate time.Time            `bson:"dispatchedDate" json:"dispatchedDate"`
+	DispatchedDate time.Time            `bson:"dispatchedDate,omitempty" json:"dispatchedDate"`
+}
+
+func NewBatch(userID string, currency money.Currency) Batch {
+	defaultAmount, _ := primitive.ParseDecimal128("0")
+	b := Batch{
+		UserID:         userID,
+		Amount:         defaultAmount,
+		Currency:       currency,
+		TransactionIDs: make([]string, 0),
+		Status:         StatusUndispatched,
+		CreatedDate:    time.Now().UTC(),
+	}
+	return b
 }

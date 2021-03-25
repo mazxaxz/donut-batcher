@@ -2,11 +2,11 @@ package config
 
 import "encoding/json"
 
-type Client struct {
+type Config struct {
 	URI string `json:"uri"`
 }
 
-func (c *Client) UnmarshalEnvironmentValue(data string) error {
+func (c *Config) UnmarshalEnvironmentValue(data string) error {
 	return json.Unmarshal([]byte(data), &c)
 }
 

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:4.4.4
+    restart: always
+    ports:
+      - 37017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: donut
+
+  rabbit:
+    image: bitnami/rabbitmq:3.8.14
+    restart: on-failure
+    ports:
+      - 35672:15672
+      - 35673:5672
+    environment:
+      - RABBITMQ_USERNAME=user
+      - RABBITMQ_PASSWORD=secret

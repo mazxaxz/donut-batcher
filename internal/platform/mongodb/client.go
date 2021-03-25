@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -10,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/mazxaxz/donut-batcher/internal/platform/mongodb/config"
+	"github.com/mazxaxz/donut-batcher/pkg/logger"
 )
 
 type Client struct {
@@ -36,6 +38,13 @@ func New(ctx context.Context, cfg config.Config, l *logrus.Logger) (*Client, err
 func (c *Client) dispose(ctx context.Context) {
 	<-ctx.Done()
 	if err := c.client.Disconnect(ctx); err != nil {
-		c.logger.Error(err)
+		hostname, _ := os.Hostname()
+		entry := logger.Log{
+			Hostname:  hostname,
+			Severity:  logrus.ErrorLevel.String(),
+			Message:   err.Error(),
+			Timestamp: time.Now().UTC(),
+		}
+		c.logger.Error(entry)
 	}
 }

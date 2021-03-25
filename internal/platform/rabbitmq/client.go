@@ -14,7 +14,7 @@ type Client struct {
 	logger     *logrus.Logger
 }
 
-func NewClient(ctx context.Context, cfg config.Client, l *logrus.Logger) (*Client, error) {
+func NewClient(ctx context.Context, cfg config.Config, l *logrus.Logger) (*Client, error) {
 	c := Client{
 		logger: l,
 	}

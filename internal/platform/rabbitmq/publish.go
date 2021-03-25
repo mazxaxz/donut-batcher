@@ -35,13 +35,24 @@ func NewPublisher(ctx context.Context, c *Client, cfg config.Publisher) (Publish
 	p.channel = ch
 	go p.close(ctx)
 
+	if _, err := p.channel.QueueDeclare(
+		cfg.Queue,
+		true,  // durable
+		false, // autoDelete
+		false, // exclusive
+		false, // noWait
+		nil); err != nil {
+
+		return nil, err
+	}
+
 	if err := p.channel.ExchangeDeclare(
 		cfg.Exchange,
 		cfg.Kind,
-		true,
-		false,
-		false,
-		false,
+		true,  // durable
+		false, // autoDelete
+		false, // internal
+		false, // noWait
 		nil); err != nil {
 
 		return nil, err

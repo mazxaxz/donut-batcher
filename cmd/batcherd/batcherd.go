@@ -11,6 +11,7 @@ import (
 	"github.com/mazxaxz/donut-batcher/internal/batch"
 	"github.com/mazxaxz/donut-batcher/internal/platform/mongodb"
 	"github.com/mazxaxz/donut-batcher/internal/platform/rabbitmq"
+	"github.com/mazxaxz/donut-batcher/pkg/banksdk"
 	"github.com/mazxaxz/donut-batcher/pkg/logger"
 	"github.com/mazxaxz/donut-batcher/pkg/shutdown"
 )
@@ -38,14 +39,20 @@ func main() {
 		log.Fatal(err)
 	}
 
+	bankSDK := banksdk.New()
+
 	dispatchPublisher, err := rabbitmq.NewPublisher(ctx, rabbitClient, cfg.MQDispatchPublisher)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	batchService := batch.New(mongoClient)
+	thresholds := map[string]string{"USD": cfg.ThresholdUSD}
+	batchService, err := batch.New(mongoClient, bankSDK, thresholds)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	transactionMessageHandler := transactionmessagehandler.New(dispatchPublisher, log)
+	transactionMessageHandler := transactionmessagehandler.New(batchService, dispatchPublisher, log)
 	dispatchMessageHandler := dispatchmessagehandler.New(log)
 
 	go rabbitClient.Subscribe(ctx, cfg.MQTransactionSubscriber, transactionMessageHandler.Handle)
@@ -58,7 +65,8 @@ func main() {
 		I see no point of doing that in here, it's just a function invocation.
 	*/
 
-	shutdown.Wait(cancel)
+	log.Info("App started...")
+	shutdown.Wait(cancel, log)
 }
 
 func index(ctx context.Context, indexers ...mongodb.Indexer) {
