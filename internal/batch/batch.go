@@ -13,6 +13,11 @@ import (
 	"github.com/mazxaxz/donut-batcher/pkg/money"
 )
 
+var (
+	ErrNoTransactionID = errors.New("no transaction id was provided")
+	ErrNoUserID        = errors.New("no user id was provided")
+)
+
 type BatchResult struct {
 	ID     primitive.ObjectID
 	Status Status
@@ -20,6 +25,14 @@ type BatchResult struct {
 
 func (c *serviceContext) Batch(ctx context.Context, t transaction.Transaction) (BatchResult, error) {
 	callback := func(sessCtx mongoOrg.SessionContext) (interface{}, error) {
+		// that could be extracted to message, but I did not wanted to add complexity with validation library
+		if t.ID == "" {
+			return nil, ErrNoTransactionID
+		}
+		if t.UserID == "" {
+			return nil, ErrNoUserID
+		}
+		//
 		currency, err := money.CurrencyFrom(t.Currency)
 		if err != nil {
 			return nil, err
@@ -58,6 +71,11 @@ func (c *serviceContext) Batch(ctx context.Context, t transaction.Transaction) (
 				return nil, err
 			}
 			if exceeded {
+				/*
+					According to AC, there should be another batch entry created with
+					status Undispatched, but it is a waste of resources IMO and that
+					should be discussed if it is needed.
+				*/
 				b.Status = StatusReadyToDispatch
 			}
 		}

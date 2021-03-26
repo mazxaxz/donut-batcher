@@ -44,6 +44,8 @@ func (c *handlerContext) Handle(ctx context.Context, delivery amqp.Delivery) (bo
 			switch err {
 			case money.ErrNegativeAmount, money.ErrZeroAmount, money.ErrInvalidCurrencyCode:
 				return true, err
+			case batch.ErrNoUserID, batch.ErrNoTransactionID:
+				return true, err
 			default:
 				return false, err
 			}

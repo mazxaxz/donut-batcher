@@ -36,7 +36,12 @@ func (c *handlerContext) Handle(ctx context.Context, delivery amqp.Delivery) (bo
 		}
 
 		if err := c.batchSvc.Dispatch(ctx, msg.BatchID); err != nil {
-			return false, err
+			switch err {
+			case batch.ErrNoBatchID:
+				return true, err
+			default:
+				return false, err
+			}
 		}
 		return true, nil
 	default:

@@ -1,8 +1,8 @@
 # donut-batcher
 
-`docker-compose -f ./docker-compose.resources.yml up`  
+`make resources`  
 wait until rabbit and mongo are alive (without implementing healthchecks "depends_on" does not work)  
 
-`docker-compose -f ./docker-compose.app.yml up --build`
+`make app`
 
 `rest.http` for app testing

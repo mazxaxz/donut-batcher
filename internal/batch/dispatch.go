@@ -10,7 +10,14 @@ import (
 	mongoOrg "go.mongodb.org/mongo-driver/mongo"
 )
 
+var (
+	ErrNoBatchID = errors.New("no batch id was provided")
+)
+
 func (c *serviceContext) Dispatch(ctx context.Context, batchID string) error {
+	if batchID == "" {
+		return ErrNoBatchID
+	}
 	ID, err := primitive.ObjectIDFromHex(batchID)
 	if err != nil {
 		return err

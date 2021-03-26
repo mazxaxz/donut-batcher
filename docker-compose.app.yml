@@ -17,7 +17,7 @@ services:
       - 38085:8085
     environment:
       HTTP: "{\"port\":8085}"
-      THRESHOLD_USD: "20"
+      THRESHOLD_USD: "100"
       MONGO_CLIENT: "{\"uri\":\"mongodb://root:password@mongo:27017/admin\",\"database\":\"donut\"}"
       MQ_CLIENT: "{\"uri\":\"amqp://user:secret@rabbit:5672/\"}"
       MQ_TRANSACTION_SUBSCRIBER: "{\"queue\":\"Donut.Q.Transaction\",\"prefetch_count\":10}"
