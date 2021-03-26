@@ -25,17 +25,17 @@ func (c *serviceContext) Dispatch(ctx context.Context, batchID string) error {
 	filter := bson.D{{"_id", ID}, {"status", StatusReadyToDispatch}}
 	result := c.mongo.FindOne(ctx, _collectionName, filter)
 	if err := result.Err(); err != nil && !errors.Is(err, mongoOrg.ErrNoDocuments) {
+		return err
+	}
+
+	var b Batch
+	if err := result.Decode(&b); err != nil {
 		switch err {
 		case mongoOrg.ErrNoDocuments:
 			return nil
 		default:
 			return err
 		}
-	}
-
-	var b Batch
-	if err := result.Decode(&b); err != nil {
-		return err
 	}
 	if err := c.bankSDK.Send(ctx, b.UserID, b.Amount.String(), b.Currency.String()); err != nil {
 		return err

@@ -16,7 +16,7 @@ import (
 
 type Clienter interface {
 	Find(ctx context.Context, coll string, filter interface{}, opt *options.FindOptions) (*mongo.Cursor, error)
-	FindOne(ctx context.Context, coll string, filter interface{}) *mongo.SingleResult
+	FindOne(ctx context.Context, coll string, filter interface{}) SingleResulter
 	UpdateOne(ctx context.Context, coll string, filter, update interface{}) error
 	InsertOne(ctx context.Context, coll string, doc interface{}) (*mongo.InsertOneResult, error)
 	WithinTransaction(ctx context.Context, cb TransactionCallback) (result interface{}, err error)

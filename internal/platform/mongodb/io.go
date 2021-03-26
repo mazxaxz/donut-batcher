@@ -11,7 +11,7 @@ func (c *clientContext) Find(ctx context.Context, coll string, filter interface{
 	return c.client.Database(c.db).Collection(coll).Find(ctx, filter, opt)
 }
 
-func (c *clientContext) FindOne(ctx context.Context, coll string, filter interface{}) *mongo.SingleResult {
+func (c *clientContext) FindOne(ctx context.Context, coll string, filter interface{}) SingleResulter {
 	return c.client.Database(c.db).Collection(coll).FindOne(ctx, filter)
 }
 
