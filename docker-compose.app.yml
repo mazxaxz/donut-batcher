@@ -1,0 +1,27 @@
+version: '3.8'
+
+networks:
+  donut-vn:
+    external:
+      name: donut-vn
+
+services:
+  batcherd:
+    build:
+      context: .
+      dockerfile: Batcherd.Dockerfile
+    restart: always
+    networks:
+      - donut-vn
+    ports:
+      - 38085:8085
+    environment:
+      HTTP: "{\"port\":8085}"
+      THRESHOLD_USD: "100"
+      MONGO_CLIENT: "{\"uri\":\"mongodb://root:password@mongo:27017/admin\",\"database\":\"donut\"}"
+      MQ_CLIENT: "{\"uri\":\"amqp://user:secret@rabbit:5672/\"}"
+      MQ_TRANSACTION_SUBSCRIBER: "{\"queue\":\"Donut.Q.Transaction\",\"prefetch_count\":10}"
+      MQ_TRANSACTION_PUBLISHER: "{\"exchange\":\"Donut.T.Topic\",\"queue\":\"Donut.Q.Transaction\",\"routing_key\":\"Donut.K.Transaction\",\"kind\":\"topic\"}"
+      MQ_DISPATCH_SUBSCRIBER: "{\"queue\":\"Donut.Q.Dispatch\",\"prefetch_count\":10}"
+      MQ_DISPATCH_PUBLISHER: "{\"exchange\":\"Donut.T.Topic\",\"queue\":\"Donut.Q.Dispatch\",\"routing_key\":\"Donut.K.Dispatch\",\"kind\":\"topic\"}"
+      LOGGER: "{\"log_level\":\"info\",\"output_type\":\"json\"}"
